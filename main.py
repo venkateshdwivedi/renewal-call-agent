@@ -8,6 +8,8 @@ import os
 import requests
 from datetime import date
 from fastapi import FastAPI, BackgroundTasks, HTTPException, Response, Request, Form
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from typing import Dict
 
 from db import init_db, get_db_connection
@@ -21,6 +23,12 @@ app = FastAPI(
     description="Demo: DB -> outbound AI voice call -> ElevenLabs data extraction -> DB update.",
     version="1.0.0",
 )
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/")
+def read_root():
+    return FileResponse("static/index.html")
 @app.on_event("startup")
 def startup():
     init_db()

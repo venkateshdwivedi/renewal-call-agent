@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Agent Dashboard</title>
+    <!-- Modern, premium font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="header">
+            <div class="header-content">
+                <div class="branding">
+                    <div class="logo">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h1>Renewals Dashboard</h1>
+                </div>
+                <div class="actions">
+                    <button id="trigger-btn" class="primary-btn">
+                        <span class="btn-text">Initiate Today's Calls</span>
+                        <span class="btn-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22 16.92V21C22 21.5523 21.5523 22 21 22C10.5066 22 2 13.4934 2 3C2 2.44772 2.44772 2 3 2H7.07998C7.58739 2 8.01633 2.37895 8.10644 2.88092L8.74934 6.46386C8.82672 6.89498 8.65349 7.33535 8.29749 7.57267L5.7951 9.24107C7.45663 12.3929 10.0215 14.9578 13.1733 16.6193L14.8417 14.1169C15.079 13.7609 15.5194 13.5877 15.9505 13.6651L19.5334 14.308C20.0354 14.3981 20.4143 14.827 20.4143 15.3344V16.92C20.4143 16.92 22 16.92 22 16.92Z" fill="currentColor"/>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="content">
+            <section class="metrics-section">
+                <h2 class="section-title">Overview</h2>
+                <div class="metrics-grid">
+                    <div class="metric-card glass">
+                        <div class="metric-label">Total Members</div>
+                        <div class="metric-value" id="metric-total">--</div>
+                    </div>
+                    <div class="metric-card glass">
+                        <div class="metric-label">Due Today</div>
+                        <div class="metric-value" id="metric-due">--</div>
+                    </div>
+                    <div class="metric-card glass">
+                        <div class="metric-label">Renewed</div>
+                        <div class="metric-value" id="metric-renewed">--</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="table-section glass">
+                <div class="table-header">
+                    <h2 class="section-title">Membership Renewals</h2>
+                    <button id="refresh-btn" class="icon-btn" title="Refresh Data">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 12C4 16.4183 7.58172 20 12 20C15.0841 20 17.76 18.252 19.1171 15.7M20 12C20 7.58172 16.4183 4 12 4C8.91592 4 6.23999 5.74805 4.88289 8.3M19.1171 15.7L21 17M19.1171 15.7L18.5 13M4.88289 8.3L3 7M4.88289 8.3L5.5 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Member</th>
+                                <th>Plan</th>
+                                <th>Due Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Agent Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <!-- Rows injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast glass hidden">
+        <div class="toast-content">
+            <span class="toast-icon"></span>
+            <span class="toast-message"></span>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
