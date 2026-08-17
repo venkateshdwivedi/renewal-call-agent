@@ -1,48 +1,43 @@
-# Renewal Reminder Calling Agent
+# AI Renewal Call Agent
 
-A small demo of an AI voice-calling pipeline: a backend queries a database for
-tasks due today, places an outbound AI voice call for each, and writes the
-call outcome back into the database — closing the loop end to end.
+A fully functional, end-to-end AI voice-calling pipeline: a backend queries a database for tasks due today, initiates an outbound AI voice call for each via Exotel, and writes the call outcome back into the database — closing the loop completely autonomously.
 
 ## Architecture
 
-```
+```text
 Database (renewals due today)
         |
         v
 FastAPI trigger endpoint  ->  queries DB, kicks off calls
         |
         v
-Twilio call routed to an ElevenLabs conversational agent
+ElevenLabs triggers an outbound call through Exotel
         |
         v
-Call happens; ElevenLabs posts the transcript to a webhook
+Call happens; Exotel streams audio to ElevenLabs WebSocket
         |
         v
-LLM extracts a structured outcome (intent, promise date, notes)
+AI collects structured data (renewal decision, rationale, member name) during the call
         |
         v
-Database updated with the outcome + an audit history row
+ElevenLabs posts the final extracted outcome to a webhook
+        |
+        v
+Database is updated with the decision ("renewed", "cancelled", etc.)
 ```
 
-## Why ElevenLabs for the voice layer
+## Why ElevenLabs & Exotel?
 
-I originally prototyped this with a lower-level real-time model for the voice
-turn-taking, but observed noticeably higher conversational latency —
-noticeable enough to feel unnatural on a live call. Switching the voice layer
-to ElevenLabs' conversational agent brought that latency down to something
-that felt like a real phone conversation. That kind of trade-off — picking
-the right tool once you've actually measured the failure mode, not just the
-one that looks best on paper — is the same judgment call I'd bring to a
-client project.
+- **Voice Latency**: Prototyping with lower-level real-time models often results in noticeable conversational latency, ruining the illusion of a live phone call. ElevenLabs' Conversational AI handles turn-taking, interruption, and response generation with sub-second latency, making it feel like a real human interaction.
+- **Data Collection**: ElevenLabs natively supports structured data extraction (JSON schema) during the call, eliminating the need to pass a raw transcript through a secondary LLM (like OpenAI) after the fact.
+- **Exotel Integration**: Twilio's trial accounts block WebSocket streaming, which breaks AI voice architectures. Pivoting to Exotel's Voicebot infrastructure combined with ElevenLabs' native telephony integration provides a robust, production-ready pipeline.
 
 ## Stack
 
 - **FastAPI** — trigger endpoint + webhook receiver
-- **SQLite** — zero-setup persistence (swap for Postgres/MySQL trivially — the
-  queries are already parameterized and vendor-neutral)
-- **Twilio + ElevenLabs Conversational AI** — outbound call + live voice agent
-- **OpenAI (or swap for Gemini)** — structured extraction from the call transcript
+- **SQLite** — zero-setup persistence (swap for Postgres/MySQL trivially — the queries are already parameterized)
+- **Exotel** — SIP trunking and outbound dialing
+- **ElevenLabs Conversational AI** — live voice agent + built-in data collection
 
 ## Setup
 
@@ -52,14 +47,18 @@ cp .env.example .env   # fill in your own keys — never commit this file
 python main.py
 ```
 
+### Required Configuration
+You must configure the following in your `.env`:
+- `ELEVENLABS_API_KEY`: Your API key
+- `ELEVENLABS_AGENT_ID`: The ID of your configured agent
+- `ELEVENLABS_PHONE_NUMBER_ID`: The ID of your Exotel phone number linked inside the ElevenLabs dashboard
+
 Then:
 - `POST /trigger-calls` — kicks off today's due renewals as outbound calls
-- `POST /webhook/call-outcome` — receives `{membership_id, transcript}` and updates the DB
+- `POST /webhook/call-outcome` — receives the structured outcome from ElevenLabs and updates the DB
 - `GET /renewals` — live status view of every renewal and its latest call outcome
 
 ## Notes
 
-- All calls in this demo go to a Twilio-trial-verified number only.
 - All SQL is parameterized — no string-interpolated queries.
-- No secrets are hardcoded anywhere; everything comes from environment
-  variables via `.env` (which is gitignored).
+- No secrets are hardcoded anywhere; everything comes from environment variables via `.env` (which is gitignored).
